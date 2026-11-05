@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+if [ -n "$GRADLE_HOME" ] && [ -x "$GRADLE_HOME/bin/gradle" ]; then
+  exec "$GRADLE_HOME/bin/gradle" "$@"
+fi
+for CACHED in "$HOME"/.gradle/wrapper/dists/gradle-8.7-bin/*/gradle-8.7/bin/gradle; do
+  if [ -x "$CACHED" ]; then
+    exec "$CACHED" "$@"
+  fi
+done
+echo "找不到 Gradle 8.7。安装 Android Studio，或设置 GRADLE_HOME。"
+exit 1
