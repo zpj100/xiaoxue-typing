@@ -42,6 +42,11 @@ android {
     buildFeatures {
         buildConfig true
     }
+    sourceSets {
+        main {
+            assets.srcDirs = [file("$rootDir/../dist")]
+        }
+    }
 }
 
 dependencies {

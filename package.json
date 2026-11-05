@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "android:assets": "npm run build && mkdir -p android/app/src/main/assets/www && cp -R dist/. android/app/src/main/assets/www/"
+    "android:assets": "npm run build"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",

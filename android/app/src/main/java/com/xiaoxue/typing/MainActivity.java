@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
         webView.addJavascriptInterface(new SpeakBridge(speaker), "AndroidSpeak");
         webView.addJavascriptInterface(new UpdateBridge(this, updater), "AndroidUpdate");
         webView.setWebViewClient(new WebViewClient());
-        webView.loadUrl("file:///android_asset/www/index.html");
+        webView.loadUrl("file:///android_asset/index.html");
     }
 
     @Override
