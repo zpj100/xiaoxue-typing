@@ -16,8 +16,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class Updater {
-    public static final String RELEASES_API = "https://api.github.com/repos/zpj100/xiaoxue-typing/releases/latest";
-    public static final String RELEASES_PAGE = "https://github.com/zpj100/xiaoxue-typing/releases";
+    public static final String RELEASES_API = "https://gitee.com/api/v5/repos/zpj100/xiaoxue-typing/releases/latest";
+    public static final String RELEASES_PAGE = "https://gitee.com/zpj100/xiaoxue-typing/releases";
 
     private final Activity activity;
 
@@ -124,7 +124,7 @@ public class Updater {
         connection.setConnectTimeout(10_000);
         connection.setReadTimeout(30_000);
         connection.setInstanceFollowRedirects(true);
-        connection.setRequestProperty("Accept", "application/vnd.github+json, application/vnd.android.package-archive, */*");
+        connection.setRequestProperty("Accept", "application/json, application/vnd.android.package-archive, */*");
         connection.setRequestProperty("User-Agent", "XiaoXueTyping/" + BuildConfig.VERSION_NAME);
         return connection;
     }

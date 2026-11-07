@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import PlayPage from './pages/PlayPage'
 import ProgressPage from './pages/ProgressPage'
 import SubjectPage from './pages/SubjectPage'
+import WrongBookPage from './pages/WrongBookPage'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/english" element={<SubjectPage subject="english" />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/wrongbook" element={<WrongBookPage />} />
           <Route path="/play/:lessonId/:mode" element={<PlayPage />} />
         </Routes>
       </main>

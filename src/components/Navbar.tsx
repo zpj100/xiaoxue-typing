@@ -23,6 +23,9 @@ export default function Navigation() {
             <Nav.Link as={NavLink} to="/progress">
               进度
             </Nav.Link>
+            <Nav.Link as={NavLink} to="/wrongbook">
+              错词本
+            </Nav.Link>
             <Nav.Link as={NavLink} to="/about">
               关于
             </Nav.Link>

@@ -304,6 +304,38 @@ a {
   }
 }
 
+.key-guide {
+  margin: 0.85rem auto 0;
+  max-width: 560px;
+}
+
+.key-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.28rem;
+  margin-bottom: 0.28rem;
+}
+
+.key-cap {
+  min-width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 0.35rem;
+  background: var(--color-muted);
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+}
+
+.key-next {
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 0 0 2px #fed7aa;
+}
+
 .about-card .btn {
   min-height: 48px;
 }

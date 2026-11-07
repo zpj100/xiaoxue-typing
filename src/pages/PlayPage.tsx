@@ -3,6 +3,7 @@ import { Alert, Badge, Container } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
 import SpeakerButton from '../components/SpeakerButton'
 import TypedLine from '../components/TypedLine'
+import KeyGuide from '../components/KeyGuide'
 import { getLesson } from '../data/lessons'
 import {
   applyKey,
@@ -14,6 +15,7 @@ import {
 } from '../lib/engine'
 import { recordLesson } from '../lib/progress'
 import type { LessonItem, PlayMode } from '../lib/types'
+import { addWrong, wrongItems } from '../lib/wrongbook'
 
 type FallItem = {
   id: number
@@ -27,9 +29,13 @@ type FallItem = {
 export default function PlayPage() {
   const { lessonId = '', mode = 'follow' } = useParams()
   const playMode = (mode as PlayMode) || 'follow'
-  const lesson = getLesson(lessonId)
+  const isWrongBook = lessonId === 'wrongbook'
+  const lesson = isWrongBook ? undefined : getLesson(lessonId)
+  const items = isWrongBook ? wrongItems() : lesson?.items ?? []
+  const title = isWrongBook ? '错词本' : lesson?.name ?? ''
+  const subject = isWrongBook ? items[0]?.subject : lesson?.subject
 
-  if (!lesson) {
+  if (!isWrongBook && !lesson) {
     return (
       <Container className="py-5">
         <Alert variant="warning">找不到这一课。</Alert>
@@ -40,19 +46,38 @@ export default function PlayPage() {
     )
   }
 
+  if (isWrongBook && items.length === 0) {
+    return (
+      <Container className="py-5">
+        <Alert variant="info">错词本是空的。</Alert>
+        <Link className="btn btn-primary" to="/wrongbook">
+          返回错词本
+        </Link>
+      </Container>
+    )
+  }
+
   if (playMode === 'fall' || playMode === 'letters') {
     return (
       <FallGame
-        lessonId={lesson.id}
-        items={lesson.items}
-        title={lesson.name}
+        lessonId={isWrongBook ? 'wrongbook' : lesson!.id}
+        items={items}
+        title={title}
         letterMode={playMode === 'letters'}
-        backTo={lesson.subject === 'english' ? '/english' : '/chinese'}
+        backTo={isWrongBook ? '/wrongbook' : subject === 'english' ? '/english' : '/chinese'}
       />
     )
   }
 
-  return <TypeGame lessonId={lesson.id} items={lesson.items} title={lesson.name} mode={playMode} />
+  return (
+    <TypeGame
+      lessonId={isWrongBook ? 'wrongbook' : lesson!.id}
+      items={items}
+      title={title}
+      mode={playMode}
+      backTo={isWrongBook ? '/wrongbook' : subject === 'english' ? '/english' : '/chinese'}
+    />
+  )
 }
 
 function TypeGame({
@@ -60,11 +85,13 @@ function TypeGame({
   items,
   title,
   mode,
+  backTo,
 }: {
   lessonId: string
   items: LessonItem[]
   title: string
   mode: PlayMode
+  backTo: string
 }) {
   const [index, setIndex] = useState(0)
   const [typed, setTyped] = useState('')
@@ -73,6 +100,7 @@ function TypeGame({
   const [typedChars, setTypedChars] = useState(0)
   const [correctChars, setCorrectChars] = useState(0)
   const [finished, setFinished] = useState(false)
+  const [startedAt] = useState(() => Date.now())
   const advancing = useRef(false)
   const statsRef = useRef({ typed: 0, correct: 0, combo: 0 })
   const inputRef = useRef<HTMLInputElement>(null)
@@ -81,7 +109,9 @@ function TypeGame({
   const match = compareInput(typed, target)
   const hideTarget = mode === 'recall'
   const useIme = item?.kind === 'write'
-  const backTo = item?.subject === 'english' ? '/english' : '/chinese'
+  const nextKey = target[typed.length] || ''
+  const minutes = Math.max((Date.now() - startedAt) / 60000, 1 / 60)
+  const wpm = Math.round(correctChars / 5 / minutes)
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -180,6 +210,8 @@ function TypeGame({
       if (target.startsWith(typed + event.key)) {
         statsRef.current.correct += 1
         setCorrectChars((v) => v + 1)
+      } else {
+        addWrong(item)
       }
     }
     setTyped(next)
@@ -197,6 +229,9 @@ function TypeGame({
           <Badge bg="primary" className="me-2">
             {index + 1}/{items.length}
           </Badge>
+          <Badge bg="info" className="me-2" text="dark">
+            {wpm} WPM
+          </Badge>
           <Badge bg="warning" text="dark">
             连击 {combo}
           </Badge>
@@ -206,7 +241,9 @@ function TypeGame({
       {finished ? (
         <div className="arena-card p-4 p-lg-5 text-center">
           <h2 className="display-font">本课完成</h2>
-          <p>正确率 {typedChars ? Math.round((correctChars / typedChars) * 100) : 100}% · 最高连击 {bestCombo}</p>
+          <p>
+            正确率 {typedChars ? Math.round((correctChars / typedChars) * 100) : 100}% · 最高连击 {bestCombo} · {wpm} WPM
+          </p>
           <div className="d-flex justify-content-center gap-2 flex-wrap">
             <button type="button" className="btn btn-outline-primary" onClick={() => jumpTo(0)}>
               再练一遍
@@ -228,6 +265,7 @@ function TypeGame({
           </div>
           <div className="play-type">
             <TypedLine target={target} typed={typed} hideTarget={hideTarget} />
+            {!useIme ? <KeyGuide nextKey={nextKey} /> : null}
             <input
               ref={inputRef}
               className="form-control form-control-lg mt-3 mx-auto play-input"

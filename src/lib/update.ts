@@ -50,7 +50,7 @@ function parseRelease(raw: unknown): LatestRelease | null {
     if (!asset || typeof asset !== 'object') continue
     const item = asset as Record<string, unknown>
     const name = String(item.name || '')
-    const url = String(item.browser_download_url || '')
+    const url = String(item.browser_download_url || item.direct_asset_url || '')
     if (name.toLowerCase().endsWith('.apk') || url.toLowerCase().includes('.apk')) {
       apkName = name || `xiaoxue-typing-${version}.apk`
       apkUrl = url
@@ -81,7 +81,7 @@ export async function fetchLatestRelease(): Promise<LatestRelease | null> {
   }
   const response = await fetch(RELEASES_API, {
     headers: {
-      Accept: 'application/vnd.github+json',
+      Accept: 'application/json',
       'User-Agent': `XiaoXueTyping/${APP_VERSION}`,
     },
   })

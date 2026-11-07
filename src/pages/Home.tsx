@@ -15,7 +15,7 @@ export default function Home() {
             <p className="text-primary fw-semibold mb-2">边打字，边把课文敲进脑子</p>
             <h1 className="display-font prompt-zh mb-3">小学打字训练营</h1>
             <p className="lead mb-4">
-              语文练拼音、识字、写字；英语练单词、音标、短语、语法。玩法：跟打、默写、落字、字母落。
+              语文练拼音、识字、写字；英语练单词、音标、短语、语法。打错整词重来、键位高亮、错词本、WPM，仿 Qwerty Learner / TypeWords。
             </p>
             <div className="d-flex flex-wrap gap-2">
               <Link className="btn btn-primary btn-lg" to="/chinese">
@@ -23,6 +23,9 @@ export default function Home() {
               </Link>
               <Link className="btn btn-outline-primary btn-lg" to="/english">
                 练英语
+              </Link>
+              <Link className="btn btn-outline-secondary btn-lg" to="/wrongbook">
+                错词本
               </Link>
               <Link className="btn btn-outline-secondary btn-lg" to="/about">
                 关于 / 更新

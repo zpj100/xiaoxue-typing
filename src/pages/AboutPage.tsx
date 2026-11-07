@@ -8,7 +8,7 @@ import {
   openRelease,
   type LatestRelease,
 } from '../lib/update'
-import { APP_NAME, APP_VERSION_CODE, GITHUB_URL, RELEASES_URL } from '../lib/version'
+import { APP_NAME, APP_VERSION_CODE, GITEE_URL, GITHUB_URL, RELEASES_URL } from '../lib/version'
 
 type Status = 'idle' | 'checking' | 'latest' | 'available' | 'error' | 'installing'
 
@@ -60,16 +60,21 @@ export default function AboutPage() {
           当前版本 <Badge bg="primary">{version}</Badge>
           <span className="text-secondary ms-2">编译号 {APP_VERSION_CODE}</span>
         </p>
-        <p className="text-secondary">语文拼音 / 识字 / 写字，英语单词 / 音标 / 短语 / 语法。跟打、默写、落字、字母落。</p>
+        <p className="text-secondary">
+          语文拼音 / 识字 / 写字，英语单词 / 音标 / 短语 / 语法。玩法借鉴 Qwerty Learner、TypeWords：打错整词重来、键位高亮、错词本、WPM。
+        </p>
         <div className="d-flex flex-wrap gap-2 mt-3">
           <button type="button" className="btn btn-primary btn-lg" onClick={checkUpdate} disabled={status === 'checking'}>
             {status === 'checking' ? '正在检查…' : '检查更新'}
           </button>
           <button type="button" className="btn btn-outline-primary btn-lg" onClick={() => openRelease(RELEASES_URL)}>
-            打开发行版
+            Gitee 发行版
+          </button>
+          <button type="button" className="btn btn-outline-secondary btn-lg" onClick={() => openRelease(GITEE_URL)}>
+            Gitee 源码
           </button>
           <button type="button" className="btn btn-outline-secondary btn-lg" onClick={() => openRelease(GITHUB_URL)}>
-            源码仓库
+            GitHub
           </button>
         </div>
 
