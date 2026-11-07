@@ -37,26 +37,47 @@ export function compareVersions(left: string, right: string): number {
   return 0
 }
 
-function parseRelease(raw: unknown): LatestRelease | null {
-  if (!raw || typeof raw !== 'object') return null
-  const data = raw as Record<string, unknown>
-  const version = String(data.tag_name || '')
-    .trim()
-    .replace(/^v/i, '')
-  const assets = Array.isArray(data.assets) ? data.assets : []
-  let apkUrl = ''
-  let apkName = ''
+function collectAssets(data: Record<string, unknown>): unknown[] {
+  const buckets = [data.assets, data.attach_files, data.attachFiles]
+  const list: unknown[] = []
+  for (const bucket of buckets) {
+    if (Array.isArray(bucket)) list.push(...bucket)
+  }
+  return list
+}
+
+function pickApk(assets: unknown[], version: string): { apkUrl: string; apkName: string } {
   for (const asset of assets) {
+    if (typeof asset === 'string') {
+      const url = asset.trim()
+      if (!url.toLowerCase().includes('.apk')) continue
+      return {
+        apkUrl: url,
+        apkName: url.split('/').pop() || `xiaoxue-typing-${version}.apk`,
+      }
+    }
     if (!asset || typeof asset !== 'object') continue
     const item = asset as Record<string, unknown>
     const name = String(item.name || '')
-    const url = String(item.browser_download_url || item.direct_asset_url || '')
+    const url = String(
+      item.browser_download_url || item.direct_asset_url || item.download_url || item.url || '',
+    )
     if (name.toLowerCase().endsWith('.apk') || url.toLowerCase().includes('.apk')) {
-      apkName = name || `xiaoxue-typing-${version}.apk`
-      apkUrl = url
-      break
+      return {
+        apkUrl: url,
+        apkName: name || `xiaoxue-typing-${version}.apk`,
+      }
     }
   }
+  return { apkUrl: '', apkName: '' }
+}
+
+function parseRelease(raw: unknown): LatestRelease | null {
+  if (!raw || typeof raw !== 'object') return null
+  const data = raw as Record<string, unknown>
+  const tag = String(data.tag_name || '').trim()
+  const version = tag.replace(/^v/i, '')
+  const { apkUrl, apkName } = pickApk(collectAssets(data), version)
   if (!version || !apkUrl) return null
   return {
     version,
@@ -64,7 +85,7 @@ function parseRelease(raw: unknown): LatestRelease | null {
     notes: String(data.body || ''),
     apkUrl,
     apkName,
-    htmlUrl: String(data.html_url || ''),
+    htmlUrl: String(data.html_url || `https://gitee.com/zpj100/xiaoxue-typing/releases/${tag}`),
   }
 }
 
