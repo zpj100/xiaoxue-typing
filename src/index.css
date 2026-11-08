@@ -1,15 +1,16 @@
 :root {
-  --color-primary: #4f46e5;
+  --color-primary: #2563eb;
   --color-on-primary: #ffffff;
-  --color-secondary: #818cf8;
+  --color-secondary: #60a5fa;
   --color-accent: #ea580c;
-  --color-background: #eef2ff;
-  --color-foreground: #1e1b4b;
-  --color-muted: #ebeef8;
-  --color-border: #c7d2fe;
+  --color-background: #f8fbff;
+  --color-foreground: #1e3a8a;
+  --color-muted: #eff6ff;
+  --color-border: #bfdbfe;
   --color-destructive: #dc2626;
   --color-success: #15803d;
   --font-display: "ZCOOL KuaiLe", "Noto Sans SC", sans-serif;
+  --font-kai: "AR PL UKai CN", "STKaiti", "KaiTi", "Noto Serif SC", serif;
   --font-body: "Noto Sans SC", "Baloo 2", system-ui, sans-serif;
   --font-type: ui-monospace, "Cascadia Code", "Noto Sans SC", monospace;
 }
@@ -91,10 +92,10 @@ a {
 .btn-primary {
   --bs-btn-bg: var(--color-primary);
   --bs-btn-border-color: var(--color-primary);
-  --bs-btn-hover-bg: #4338ca;
-  --bs-btn-hover-border-color: #4338ca;
-  --bs-btn-active-bg: #3730a3;
-  --bs-btn-active-border-color: #3730a3;
+  --bs-btn-hover-bg: #1d4ed8;
+  --bs-btn-hover-border-color: #1d4ed8;
+  --bs-btn-active-bg: #1e40af;
+  --bs-btn-active-border-color: #1e40af;
 }
 
 .btn-accent {
@@ -346,6 +347,87 @@ a {
   background: var(--color-muted);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
+}
+
+.brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  color: #2563eb;
+  font-family: var(--font-kai);
+  font-size: 0.72rem;
+  line-height: 1.05;
+  font-weight: 700;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.star-row {
+  color: #f59e0b;
+  letter-spacing: 0.08em;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.filter-board {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 1.1rem;
+}
+
+.filter-label {
+  font-weight: 700;
+  color: var(--color-foreground);
+  margin-bottom: 0.45rem;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip-btn {
+  min-height: 44px;
+  padding: 0.35rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-foreground);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip-btn.is-on,
+.chip-btn:hover,
+.chip-btn:focus-visible {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  outline: none;
+}
+
+.play-mode-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.speed-bar {
+  max-width: 520px;
+}
+
+.flash-card .prompt-zh {
+  min-height: 4.5rem;
+}
+
+.play-mode-grid .btn {
+  min-height: 44px;
 }
 
 @media (prefers-reduced-motion: reduce) {

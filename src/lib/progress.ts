@@ -1,4 +1,4 @@
-import type { ProgressStore } from './types'
+import type { PlayMode, ProgressStore } from './types'
 
 const KEY = 'xiaoxue-typing-progress-v1'
 
@@ -29,9 +29,16 @@ export function saveProgress(store: ProgressStore): void {
   localStorage.setItem(KEY, JSON.stringify(store))
 }
 
+export function rememberPlay(lessonId: string, mode: PlayMode): void {
+  const store = loadProgress()
+  store.lastLessonId = lessonId
+  store.lastMode = mode
+  saveProgress(store)
+}
+
 export function recordLesson(
   lessonId: string,
-  stats: { typed: number; correct: number; combo: number; finished: boolean },
+  stats: { typed: number; correct: number; combo: number; finished: boolean; stars?: number },
 ): ProgressStore {
   const store = loadProgress()
   store.typedChars += stats.typed
@@ -40,7 +47,11 @@ export function recordLesson(
   const prev = store.lessons[lessonId] ?? { done: 0, bestCombo: 0 }
   if (stats.finished) {
     prev.done += 1
-    store.stars += 1
+    store.stars += stats.stars ?? 1
+    if (lessonId.startsWith('daily-')) {
+      store.dailyDate = lessonId.slice(6)
+      store.dailyStars = stats.stars ?? 1
+    }
   }
   prev.bestCombo = Math.max(prev.bestCombo, stats.combo)
   store.lessons[lessonId] = prev

@@ -5,7 +5,11 @@ export default function Navigation() {
   return (
     <Navbar expand="lg" className="site-nav sticky-top">
       <Container>
-        <Navbar.Brand as={Link} to="/">
+        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
+          <span className="brand-mark" aria-hidden="true">
+            <span>打字</span>
+            <span>游戏</span>
+          </span>
           小学打字训练营
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="main-nav" />
@@ -22,6 +26,9 @@ export default function Navigation() {
             </Nav.Link>
             <Nav.Link as={NavLink} to="/progress">
               进度
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/play/review/flash">
+              复习
             </Nav.Link>
             <Nav.Link as={NavLink} to="/wrongbook">
               错词本

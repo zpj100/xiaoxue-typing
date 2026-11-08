@@ -1,6 +1,6 @@
 export const APP_NAME = '小学打字训练营'
-export const APP_VERSION = '1.1.0'
-export const APP_VERSION_CODE = 2
+export const APP_VERSION = '1.3.0'
+export const APP_VERSION_CODE = 4
 export const GITEE_OWNER = 'zpj100'
 export const GITEE_REPO = 'xiaoxue-typing'
 export const GITEE_URL = `https://gitee.com/${GITEE_OWNER}/${GITEE_REPO}`
