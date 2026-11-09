@@ -1,6 +1,6 @@
 import { Col, Container, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
-import { BANK_STATS, dailyLesson, resumePath, reviewLesson } from '../data/lessons'
+import { BANK_STATS, dailyLesson, reviewLesson } from '../data/lessons'
 import { memoryStats } from '../lib/memory'
 import { accuracy, loadProgress } from '../lib/progress'
 
@@ -10,7 +10,6 @@ export default function Home() {
   const daily = dailyLesson()
   const review = reviewLesson()
   const memory = memoryStats()
-  const resume = resumePath(progress.lastLessonId, progress.lastMode)
   const dailyDone = Boolean(progress.dailyDate && progress.lessons[daily.id]?.done)
 
   return (
@@ -23,26 +22,29 @@ export default function Home() {
             <p className="lead mb-4">
               按年级、上下册选课。语文拼音识字写字，英语 PEP 课本草。闪卡先默打再评级，到期卡片按间隔再出。
             </p>
-            <div className="d-flex flex-wrap gap-2">
-              {memory.due > 0 ? (
-                <Link className="btn btn-success btn-lg" to="/play/review/flash">
-                  今日复习 {memory.due}
+            <div className="home-tabs">
+              <div className="home-tab-row">
+                <Link className="btn btn-primary" to="/chinese">
+                  语文
                 </Link>
-              ) : resume ? (
-                <Link className="btn btn-primary btn-lg" to={resume}>
-                  接着练
+                <Link className="btn btn-outline-primary" to="/english">
+                  英语
                 </Link>
-              ) : (
-                <Link className="btn btn-primary btn-lg" to="/chinese">
-                  选年级开练
+                <Link className="btn btn-outline-primary" to="/progress">
+                  进度
                 </Link>
-              )}
-              <Link className="btn btn-outline-primary btn-lg" to="/english">
-                英语课表
-              </Link>
-              <Link className="btn btn-outline-secondary btn-lg" to="/wrongbook">
-                错词本
-              </Link>
+              </div>
+              <div className="home-tab-row">
+                <Link className={memory.due > 0 ? 'btn btn-success' : 'btn btn-outline-primary'} to="/play/review/flash">
+                  复习{memory.due > 0 ? ` ${memory.due}` : ''}
+                </Link>
+                <Link className="btn btn-outline-secondary" to="/wrongbook">
+                  错词本
+                </Link>
+                <Link className="btn btn-outline-secondary" to="/about">
+                  关于
+                </Link>
+              </div>
             </div>
           </div>
         </Col>

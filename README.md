@@ -2,7 +2,7 @@
 
 给小学生用的语文 / 英语打字游戏。打开浏览器就能练。
 
-当前版本 **1.3.0**。公开仓：[gitee.com/zpj100/xiaoxue-typing](https://gitee.com/zpj100/xiaoxue-typing)。安装包在 [Gitee Releases](https://gitee.com/zpj100/xiaoxue-typing/releases)。App 内「关于」检查 Gitee 发行版并安装 APK。GitHub 镜像：[github.com/zpj100/xiaoxue-typing](https://github.com/zpj100/xiaoxue-typing)。
+当前版本 **1.3.1**。公开仓：[gitee.com/zpj100/xiaoxue-typing](https://gitee.com/zpj100/xiaoxue-typing)。安装包在 [Gitee Releases](https://gitee.com/zpj100/xiaoxue-typing/releases)。App 内「关于」检查 Gitee 发行版并安装 APK。GitHub 镜像：[github.com/zpj100/xiaoxue-typing](https://github.com/zpj100/xiaoxue-typing)。
 
 ## 练什么
 
@@ -47,7 +47,7 @@ cd android
 ./gradlew assembleRelease --no-daemon
 ```
 
-产物：`android/app/build/outputs/apk/release/app-release.apk`。拷成 `xiaoxue-typing-1.3.0.apk` 挂到 Gitee Release，不要 `git add`。
+产物：`android/app/build/outputs/apk/release/app-release.apk`。拷成 `xiaoxue-typing-1.3.1.apk` 挂到 Gitee Release，不要 `git add`。
 
 包名 `com.xiaoxue.typing`，`minSdk 24`，横竖屏随平板转动。离线 WebView 用 `HashRouter`；朗读走系统 TTS（`AndroidSpeak`）。关于页走 `AndroidUpdate` 检 Gitee 最新发行版。
 

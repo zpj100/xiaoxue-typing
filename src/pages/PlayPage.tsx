@@ -27,6 +27,7 @@ type FallItem = {
 }
 
 const SPEED_STEPS = [
+  { label: '最慢', base: 0.28 },
   { label: '慢', base: 0.7 },
   { label: '中', base: 1.4 },
   { label: '快', base: 2.2 },
@@ -540,13 +541,17 @@ function FallGame({
   const [over, setOver] = useState(false)
   const [current, setCurrent] = useState<LessonItem | null>(null)
   const [round, setRound] = useState(0)
-  const [speedStep, setSpeedStep] = useState(1)
+  const [speedStep, setSpeedStep] = useState(2)
   const idRef = useRef(0)
   const spokenRef = useRef<Set<number>>(new Set())
+  const speakQueueRef = useRef<{ item: LessonItem; letter: string }[]>([])
+  const speakingRef = useRef(false)
+  const letterModeRef = useRef(letterMode)
   const inputRef = useRef<HTMLInputElement>(null)
-  const speedRef = useRef(SPEED_STEPS[1].base)
+  const speedRef = useRef(SPEED_STEPS[2].base)
   const lives = 8
-  speedRef.current = SPEED_STEPS[speedStep].base + Math.min(score, 24) * 0.05
+  letterModeRef.current = letterMode
+  speedRef.current = SPEED_STEPS[speedStep].base + Math.min(score, 24) * 0.02
 
   useEffect(() => {
     rememberPlay(lessonId, letterMode ? 'letters' : 'fall')
@@ -602,19 +607,34 @@ function FallGame({
     }
   }, [over, pool, letterMode, round])
 
+  function pumpSpeak() {
+    if (speakingRef.current) return
+    const next = speakQueueRef.current.shift()
+    if (!next) return
+    speakingRef.current = true
+    setCurrent(next.item)
+    const done = () => {
+      speakingRef.current = false
+      pumpSpeak()
+    }
+    if (letterModeRef.current) speakLetterWithWord(next.letter, next.item, done)
+    else speakItem(next.item, done)
+  }
+
   useEffect(() => {
     falling.forEach((row) => {
       if (spokenRef.current.has(row.id)) return
       spokenRef.current.add(row.id)
-      setCurrent(row.item)
-      if (letterMode) speakLetterWithWord(row.letter, row.item)
-      else speakItem(row.item)
+      speakQueueRef.current.push({ item: row.item, letter: row.letter })
     })
-  }, [falling, letterMode])
+    pumpSpeak()
+  }, [falling])
 
   useEffect(() => {
     if (miss >= 8 && !over) {
       setOver(true)
+      speakQueueRef.current = []
+      speakingRef.current = false
       stopSpeak()
       recordLesson(lessonId, {
         typed: score + miss,
@@ -633,8 +653,6 @@ function FallGame({
     setScore((v) => v + 1)
     setCombo((v) => v + 1)
     setCurrent(hit.item)
-    if (letterMode) speakLetterWithWord(hit.letter, hit.item)
-    else speakItem(hit.item)
     return true
   }
 
@@ -718,6 +736,8 @@ function FallGame({
                   setOver(false)
                   setCurrent(null)
                   spokenRef.current = new Set()
+                  speakQueueRef.current = []
+                  speakingRef.current = false
                   setRound((v) => v + 1)
                 }}
               >
@@ -729,10 +749,14 @@ function FallGame({
         <aside className="fall-aside arena-card p-3">
           <SpeakerButton
             onClick={() => {
-              if (current) {
-                if (letterMode && falling[0]) speakLetterWithWord(falling[0].letter, current)
-                else speakItem(current)
+              if (!current) return
+              speakingRef.current = true
+              const done = () => {
+                speakingRef.current = false
+                pumpSpeak()
               }
+              if (letterMode && falling[0]) speakLetterWithWord(falling[0].letter, current, done)
+              else speakItem(current, done)
             }}
           />
           {current ? (

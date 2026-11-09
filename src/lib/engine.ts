@@ -13,8 +13,10 @@ declare global {
   interface Window {
     AndroidSpeak?: {
       speak: (text: string, lang: string) => void
+      speakAndNotify?: (text: string, lang: string) => void
       stop: () => void
     }
+    __xiaoxueSpeakDone?: () => void
   }
 }
 
@@ -48,46 +50,102 @@ export function applyKey(typed: string, target: string, key: string, replayWrong
   return next
 }
 
-export function stopSpeak(): void {
-  if (window.AndroidSpeak) {
-    window.AndroidSpeak.stop()
-    return
-  }
-  if (window.speechSynthesis) window.speechSynthesis.cancel()
+let speakToken = 0
+const speakWaiters: Array<() => void> = []
+
+function flushSpeakWaiters(): void {
+  const waiters = speakWaiters.splice(0)
+  waiters.forEach((waiter) => waiter())
 }
 
-function nativeSpeak(parts: SpeakPart[]): void {
-  if (!window.AndroidSpeak) return
-  window.AndroidSpeak.stop()
-  let delay = 0
-  parts.forEach((part) => {
-    window.setTimeout(() => window.AndroidSpeak?.speak(part.text, part.lang), delay)
-    delay += Math.max(700, part.text.length * 280)
+if (typeof window !== 'undefined') {
+  window.__xiaoxueSpeakDone = () => {
+    const waiter = speakWaiters.shift()
+    waiter?.()
+  }
+}
+
+export function stopSpeak(): void {
+  speakToken += 1
+  if (window.AndroidSpeak) window.AndroidSpeak.stop()
+  else if (window.speechSynthesis) window.speechSynthesis.cancel()
+  flushSpeakWaiters()
+}
+
+function waitNativeDone(): Promise<void> {
+  return new Promise((resolve) => {
+    const finish = () => {
+      window.clearTimeout(timer)
+      const index = speakWaiters.indexOf(finish)
+      if (index >= 0) speakWaiters.splice(index, 1)
+      resolve()
+    }
+    const timer = window.setTimeout(finish, 8000)
+    speakWaiters.push(finish)
   })
 }
 
-function webSpeak(parts: SpeakPart[]): void {
-  if (!window.speechSynthesis) return
+async function nativeSpeak(parts: SpeakPart[], onDone?: () => void): Promise<void> {
+  if (!window.AndroidSpeak) {
+    onDone?.()
+    return
+  }
+  const mine = speakToken
+  for (const part of parts) {
+    if (speakToken !== mine) {
+      onDone?.()
+      return
+    }
+    if (window.AndroidSpeak.speakAndNotify) {
+      window.AndroidSpeak.speakAndNotify(part.text, part.lang)
+      await waitNativeDone()
+    } else {
+      window.AndroidSpeak.speak(part.text, part.lang)
+      await new Promise((resolve) => window.setTimeout(resolve, Math.max(700, part.text.length * 280)))
+    }
+  }
+  onDone?.()
+}
+
+function webSpeak(parts: SpeakPart[], onDone?: () => void): void {
+  if (!window.speechSynthesis) {
+    onDone?.()
+    return
+  }
+  const mine = speakToken
   window.speechSynthesis.cancel()
   const play = (index: number) => {
-    if (index >= parts.length) return
+    if (speakToken !== mine) return
+    if (index >= parts.length) {
+      onDone?.()
+      return
+    }
     const utter = new SpeechSynthesisUtterance(parts[index].text)
     utter.lang = parts[index].lang
     utter.rate = 0.88
     utter.onend = () => play(index + 1)
+    utter.onerror = () => play(index + 1)
     window.speechSynthesis.speak(utter)
   }
   play(0)
 }
 
-export function speakParts(parts: SpeakPart[]): void {
+export function speakParts(parts: SpeakPart[], onDone?: () => void): void {
   const clean = parts.filter((part) => part.text.trim().length > 0)
-  if (clean.length === 0) return
-  if (window.AndroidSpeak) {
-    nativeSpeak(clean)
+  speakToken += 1
+  const mine = speakToken
+  if (clean.length === 0) {
+    onDone?.()
     return
   }
-  webSpeak(clean)
+  const finish = () => {
+    if (speakToken === mine) onDone?.()
+  }
+  if (window.AndroidSpeak) {
+    void nativeSpeak(clean, finish)
+    return
+  }
+  webSpeak(clean, finish)
 }
 
 export function speak(text: string, lang = 'zh-CN'): void {
@@ -125,17 +183,20 @@ export function voiceParts(item: LessonItem): SpeakPart[] {
   ]
 }
 
-export function speakItem(item: LessonItem): void {
-  speakParts(voiceParts(item))
+export function speakItem(item: LessonItem, onDone?: () => void): void {
+  speakParts(voiceParts(item), onDone)
 }
 
-export function speakLetterWithWord(letter: string, item: LessonItem): void {
+export function speakLetterWithWord(letter: string, item: LessonItem, onDone?: () => void): void {
   const wordLang = item.subject === 'english' ? 'en-US' : 'zh-CN'
   const word = item.subject === 'english' ? item.answer : item.prompt
   const meaning = item.subject === 'english' ? item.prompt : item.phonetic || item.hint || ''
-  speakParts([
-    { text: letter.toUpperCase(), lang: /[a-z]/i.test(letter) ? 'en-US' : wordLang },
-    { text: word, lang: wordLang },
-    { text: meaning, lang: 'zh-CN' },
-  ])
+  speakParts(
+    [
+      { text: letter.toUpperCase(), lang: /[a-z]/i.test(letter) ? 'en-US' : wordLang },
+      { text: word, lang: wordLang },
+      { text: meaning, lang: 'zh-CN' },
+    ],
+    onDone,
+  )
 }

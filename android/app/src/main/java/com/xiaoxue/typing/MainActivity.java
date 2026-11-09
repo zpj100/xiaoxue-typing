@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
-        webView.addJavascriptInterface(new SpeakBridge(speaker), "AndroidSpeak");
+        webView.addJavascriptInterface(new SpeakBridge(speaker, webView), "AndroidSpeak");
         webView.addJavascriptInterface(new UpdateBridge(this, updater), "AndroidUpdate");
         webView.setWebViewClient(new WebViewClient());
         webView.loadUrl("file:///android_asset/index.html");
