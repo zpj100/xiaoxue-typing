@@ -3,6 +3,7 @@ package com.xiaoxue.typing;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.webkit.WebView;
 
 import androidx.core.content.FileProvider;
 
@@ -20,9 +21,23 @@ public class Updater {
     public static final String RELEASES_PAGE = "https://gitee.com/zpj100/xiaoxue-typing/releases";
 
     private final Activity activity;
+    private WebView webView;
 
     public Updater(Activity activity) {
         this.activity = activity;
+    }
+
+    public void setWebView(WebView webView) {
+        this.webView = webView;
+    }
+
+    private void notifyProgress(int percent, long received, long total, String status) {
+        final WebView view = webView;
+        if (view == null) return;
+        final String script = "window.__xuejiUpdateProgress && window.__xuejiUpdateProgress("
+                + percent + "," + received + "," + total + ","
+                + org.json.JSONObject.quote(status) + ")";
+        activity.runOnUiThread(() -> view.evaluateJavascript(script, null));
     }
 
     public String fetchLatest() throws Exception {
@@ -56,15 +71,19 @@ public class Updater {
             return;
         }
         final String apkUrl = url.trim();
-        final String fileName = (name == null || name.trim().isEmpty()) ? "xiaoxue-typing-update.apk" : name.trim();
+        final String fileName = (name == null || name.trim().isEmpty()) ? "xueji-xiaoxue-update.apk" : name.trim();
+        notifyProgress(0, 0, 0, "downloading");
         new Thread(() -> {
             try {
                 File apk = download(apkUrl, fileName);
+                notifyProgress(100, apk.length(), apk.length(), "done");
                 activity.runOnUiThread(() -> install(apk));
-            } catch (Exception ignored) {
+            } catch (Exception error) {
+                String message = error.getMessage() == null ? "下载失败" : error.getMessage();
+                notifyProgress(-1, 0, 0, "error:" + message);
                 activity.runOnUiThread(() -> openUrl(apkUrl));
             }
-        }, "xiaoxue-update").start();
+        }, "xueji-update").start();
     }
 
     public void install(File apk) {
@@ -96,11 +115,20 @@ public class Updater {
             if (code < 200 || code >= 300) {
                 throw new IllegalStateException("下载失败：HTTP " + code);
             }
+            long total = connection.getContentLengthLong();
+            long received = 0;
+            int lastPercent = -1;
             try (InputStream input = connection.getInputStream(); FileOutputStream output = new FileOutputStream(partial)) {
                 byte[] buffer = new byte[128 * 1024];
                 int count;
                 while ((count = input.read(buffer)) >= 0) {
                     output.write(buffer, 0, count);
+                    received += count;
+                    int percent = total > 0 ? (int) Math.min(99, received * 100 / total) : -1;
+                    if (percent != lastPercent) {
+                        lastPercent = percent;
+                        notifyProgress(percent, received, total, "downloading");
+                    }
                 }
                 output.getFD().sync();
             }
@@ -122,10 +150,10 @@ public class Updater {
     private HttpURLConnection open(String target) throws Exception {
         HttpURLConnection connection = (HttpURLConnection) new URL(target).openConnection();
         connection.setConnectTimeout(10_000);
-        connection.setReadTimeout(30_000);
+        connection.setReadTimeout(120_000);
         connection.setInstanceFollowRedirects(true);
         connection.setRequestProperty("Accept", "application/json, application/vnd.android.package-archive, */*");
-        connection.setRequestProperty("User-Agent", "XiaoXueTyping/" + BuildConfig.VERSION_NAME);
+        connection.setRequestProperty("User-Agent", "XuejiXiaoxue/" + BuildConfig.VERSION_NAME);
         return connection;
     }
 

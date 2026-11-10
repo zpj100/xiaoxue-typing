@@ -7,10 +7,10 @@ export default function Navigation() {
       <Container>
         <Navbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2">
           <span className="brand-mark" aria-hidden="true">
-            <span>打字</span>
-            <span>游戏</span>
+            <span>学记</span>
+            <span>小学</span>
           </span>
-          小学打字训练营
+          学记小学
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="main-nav" />
         <Navbar.Collapse id="main-nav">

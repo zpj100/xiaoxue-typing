@@ -18,7 +18,7 @@ export default function Home() {
         <Col lg={7}>
           <div className="hero-card p-4 p-lg-5">
             <p className="text-primary fw-semibold mb-2">白底蓝字 · 打字游戏</p>
-            <h1 className="display-font prompt-zh mb-3">小学打字训练营</h1>
+            <h1 className="display-font prompt-zh mb-3">学记小学</h1>
             <p className="lead mb-4">
               按年级选课。拼音听写跟读，48 个国际音标先听再打。闪卡先默打，到期卡进今日复习。
             </p>

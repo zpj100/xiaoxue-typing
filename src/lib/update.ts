@@ -17,6 +17,7 @@ declare global {
       openUrl: (url: string) => void
       downloadAndInstall: (url: string, name: string) => void
     }
+    __xuejiUpdateProgress?: (percent: number, received: number, total: number, status: string) => void
   }
 }
 
@@ -53,7 +54,7 @@ function pickApk(assets: unknown[], version: string): { apkUrl: string; apkName:
       if (!url.toLowerCase().includes('.apk')) continue
       return {
         apkUrl: url,
-        apkName: url.split('/').pop() || `xiaoxue-typing-${version}.apk`,
+        apkName: url.split('/').pop() || `xueji-xiaoxue-${version}.apk`,
       }
     }
     if (!asset || typeof asset !== 'object') continue
@@ -65,7 +66,7 @@ function pickApk(assets: unknown[], version: string): { apkUrl: string; apkName:
     if (name.toLowerCase().endsWith('.apk') || url.toLowerCase().includes('.apk')) {
       return {
         apkUrl: url,
-        apkName: name || `xiaoxue-typing-${version}.apk`,
+        apkName: name || `xueji-xiaoxue-${version}.apk`,
       }
     }
   }
@@ -81,7 +82,7 @@ function parseRelease(raw: unknown): LatestRelease | null {
   if (!version || !apkUrl) return null
   return {
     version,
-    title: String(data.name || `小学打字训练营 ${version}`),
+    title: String(data.name || `学记小学 ${version}`),
     notes: String(data.body || ''),
     apkUrl,
     apkName,
@@ -103,7 +104,7 @@ export async function fetchLatestRelease(): Promise<LatestRelease | null> {
   const response = await fetch(RELEASES_API, {
     headers: {
       Accept: 'application/json',
-      'User-Agent': `XiaoXueTyping/${APP_VERSION}`,
+      'User-Agent': `XuejiXiaoxue/${APP_VERSION}`,
     },
   })
   if (response.status === 404) return null
@@ -123,7 +124,22 @@ export function openRelease(url: string): void {
   window.open(url, '_blank', 'noopener')
 }
 
-export function installRelease(release: LatestRelease): void {
+export type UpdateProgress = {
+  percent: number
+  received: number
+  total: number
+  status: string
+}
+
+export function installRelease(
+  release: LatestRelease,
+  onProgress?: (progress: UpdateProgress) => void,
+): void {
+  if (onProgress) {
+    window.__xuejiUpdateProgress = (percent, received, total, status) => {
+      onProgress({ percent, received, total, status })
+    }
+  }
   if (window.AndroidUpdate?.downloadAndInstall) {
     window.AndroidUpdate.downloadAndInstall(release.apkUrl, release.apkName)
     return
