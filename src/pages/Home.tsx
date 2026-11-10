@@ -20,7 +20,7 @@ export default function Home() {
             <p className="text-primary fw-semibold mb-2">白底蓝字 · 打字游戏</p>
             <h1 className="display-font prompt-zh mb-3">小学打字训练营</h1>
             <p className="lead mb-4">
-              按年级、上下册选课。语文拼音识字写字，英语 PEP 课本草。闪卡先默打再评级，到期卡片按间隔再出。
+              按年级选课。拼音听写跟读，48 个国际音标先听再打。闪卡先默打，到期卡进今日复习。
             </p>
             <div className="home-tabs">
               <div className="home-tab-row">
@@ -35,14 +35,14 @@ export default function Home() {
                 </Link>
               </div>
               <div className="home-tab-row">
+                <Link className="btn btn-outline-success" to="/pinyin">
+                  拼音
+                </Link>
+                <Link className="btn btn-outline-info" to="/phonetic">
+                  音标
+                </Link>
                 <Link className={memory.due > 0 ? 'btn btn-success' : 'btn btn-outline-primary'} to="/play/review/flash">
                   复习{memory.due > 0 ? ` ${memory.due}` : ''}
-                </Link>
-                <Link className="btn btn-outline-secondary" to="/wrongbook">
-                  错词本
-                </Link>
-                <Link className="btn btn-outline-secondary" to="/about">
-                  关于
                 </Link>
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function Home() {
         </Col>
       </Row>
 
-      <h2 className="display-font h3 mt-5 mb-3">五种玩法</h2>
+      <h2 className="display-font h3 mt-5 mb-3">七种玩法</h2>
       <Row className="g-3">
         <Col md={6} xl={4}>
           <div className="mode-card p-4 h-100">
@@ -138,6 +138,18 @@ export default function Home() {
           <div className="mode-card p-4 h-100">
             <h3 className="h5 display-font">默写</h3>
             <p className="mb-0 text-secondary">只给汉字、中文或音标，凭记忆敲出来。</p>
+          </div>
+        </Col>
+        <Col md={6} xl={4}>
+          <div className="mode-card p-4 h-100">
+            <h3 className="h5 display-font">听写</h3>
+            <p className="mb-0 text-secondary">只播声音，不看字。拼音打韵母，音标打例词。</p>
+          </div>
+        </Col>
+        <Col md={6} xl={4}>
+          <div className="mode-card p-4 h-100">
+            <h3 className="h5 display-font">跟读</h3>
+            <p className="mb-0 text-secondary">先听再跟读，读完点会了或还不会，进间隔记忆。</p>
           </div>
         </Col>
         <Col md={6} xl={4}>

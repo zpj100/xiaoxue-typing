@@ -1,4 +1,5 @@
 import type { LessonItem } from '../lib/types'
+import { ipaChart } from './ipa-chart'
 import raw from './english.json'
 
 type RawItem = LessonItem & { kind: 'word' | 'phrase' | 'phonetic' }
@@ -7,7 +8,7 @@ const pack = raw as { words: RawItem[]; phrases: RawItem[]; phonetics: RawItem[]
 
 export const englishWords: LessonItem[] = pack.words
 export const englishPhrases: LessonItem[] = pack.phrases
-export const englishPhonetics: LessonItem[] = pack.phonetics
+export const englishPhonetics: LessonItem[] = [...ipaChart, ...pack.phonetics]
 
 export const englishGrammar: LessonItem[] = [
   { id: 'gr-3-1', subject: 'english', grade: 3, term: 1, unit: 'be 动词', kind: 'grammar', title: 'be 动词', prompt: 'I ___ a student. (am/is/are)', answer: 'am', hint: 'I 后面用 am' },

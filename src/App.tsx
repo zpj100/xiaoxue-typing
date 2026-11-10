@@ -19,6 +19,8 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/chinese" element={<SubjectPage subject="chinese" />} />
           <Route path="/english" element={<SubjectPage subject="english" />} />
+          <Route path="/pinyin" element={<SubjectPage subject="chinese" initialKind="pinyin" lockKind />} />
+          <Route path="/phonetic" element={<SubjectPage subject="english" initialKind="phonetic" lockKind />} />
           <Route path="/progress" element={<ProgressPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/wrongbook" element={<WrongBookPage />} />

@@ -11,12 +11,20 @@ const KIND_FILTER: Record<Subject, Kind[]> = {
   english: ['word', 'phonetic', 'phrase', 'grammar'],
 }
 
-export default function SubjectPage({ subject }: { subject: Subject }) {
+export default function SubjectPage({
+  subject,
+  initialKind = 'all',
+  lockKind = false,
+}: {
+  subject: Subject
+  initialKind?: Kind | 'all'
+  lockKind?: boolean
+}) {
   const all = lessonsBySubject(subject)
   const grades = subject === 'chinese' ? [1, 2, 3, 4, 5, 6] : [3, 4, 5, 6]
   const [grade, setGrade] = useState<number | 'all'>('all')
   const [term, setTerm] = useState<Term | 'all'>('all')
-  const [kind, setKind] = useState<Kind | 'all'>('all')
+  const [kind, setKind] = useState<Kind | 'all'>(initialKind)
   const progress = loadProgress()
 
   const filtered = useMemo(() => {
@@ -39,7 +47,14 @@ export default function SubjectPage({ subject }: { subject: Subject }) {
     return [...map.entries()]
   }, [filtered])
 
-  const title = subject === 'chinese' ? '语文打字' : '英语打字'
+  const title =
+    lockKind && initialKind === 'pinyin'
+      ? '汉语拼音'
+      : lockKind && initialKind === 'phonetic'
+        ? '英语音标'
+        : subject === 'chinese'
+          ? '语文打字'
+          : '英语打字'
   const firstTodo = filtered.find((lesson) => !progress.lessons[lesson.id]?.done)
 
   return (
@@ -48,7 +63,7 @@ export default function SubjectPage({ subject }: { subject: Subject }) {
         <div>
           <h1 className="display-font mb-1">{title}</h1>
           <p className="text-secondary mb-0">
-            {filtered.length} 课 · 先选年级和上下册，再选拼音/单词等
+            {filtered.length} 课 · {lockKind ? '先听再打，到期卡进今日复习' : '先选年级和上下册，再选拼音/单词等'}
           </p>
         </div>
         {firstTodo ? (
@@ -86,19 +101,21 @@ export default function SubjectPage({ subject }: { subject: Subject }) {
             </button>
           </div>
         </div>
-        <div className="filter-block">
-          <div className="filter-label">内容</div>
-          <div className="chip-row">
-            <button type="button" className={chipClass(kind === 'all')} onClick={() => setKind('all')}>
-              全部
-            </button>
-            {KIND_FILTER[subject].map((k) => (
-              <button key={k} type="button" className={chipClass(kind === k)} onClick={() => setKind(k)}>
-                {KIND_NAME[k]}
+        {lockKind ? null : (
+          <div className="filter-block">
+            <div className="filter-label">内容</div>
+            <div className="chip-row">
+              <button type="button" className={chipClass(kind === 'all')} onClick={() => setKind('all')}>
+                全部
               </button>
-            ))}
+              {KIND_FILTER[subject].map((k) => (
+                <button key={k} type="button" className={chipClass(kind === k)} onClick={() => setKind(k)}>
+                  {KIND_NAME[k]}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {groups.length === 0 ? (

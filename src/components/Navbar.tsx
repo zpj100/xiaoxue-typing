@@ -24,6 +24,12 @@ export default function Navigation() {
             <Nav.Link as={NavLink} to="/english">
               英语
             </Nav.Link>
+            <Nav.Link as={NavLink} to="/pinyin">
+              拼音
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="/phonetic">
+              音标
+            </Nav.Link>
             <Nav.Link as={NavLink} to="/progress">
               进度
             </Nav.Link>

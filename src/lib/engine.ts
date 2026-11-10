@@ -183,6 +183,14 @@ export function voiceParts(item: LessonItem): SpeakPart[] {
   ]
 }
 
+export function speakListen(item: LessonItem, onDone?: () => void): void {
+  if (item.subject === 'english') {
+    speakParts([{ text: item.answer, lang: 'en-US' }], onDone)
+    return
+  }
+  speakParts([{ text: item.phonetic || item.prompt || item.answer, lang: 'zh-CN' }], onDone)
+}
+
 export function speakItem(item: LessonItem, onDone?: () => void): void {
   speakParts(voiceParts(item), onDone)
 }

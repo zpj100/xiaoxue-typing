@@ -1,6 +1,6 @@
 export type Subject = 'chinese' | 'english'
 export type Kind = 'pinyin' | 'hanzi' | 'write' | 'word' | 'phonetic' | 'phrase' | 'grammar'
-export type PlayMode = 'follow' | 'recall' | 'flash' | 'fall' | 'letters'
+export type PlayMode = 'follow' | 'recall' | 'listen' | 'speak' | 'flash' | 'fall' | 'letters'
 export type Term = 1 | 2
 
 export type LessonItem = {

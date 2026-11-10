@@ -5,6 +5,8 @@ import type { Lesson, PlayMode } from '../lib/types'
 const MODE_CLASS: Record<PlayMode, string> = {
   follow: 'btn btn-primary',
   recall: 'btn btn-outline-primary',
+  listen: 'btn btn-outline-success',
+  speak: 'btn btn-outline-info',
   flash: 'btn btn-success',
   fall: 'btn btn-warning',
   letters: 'btn btn-accent',
@@ -13,6 +15,8 @@ const MODE_CLASS: Record<PlayMode, string> = {
 const MODE_LABEL: Record<PlayMode, string> = {
   follow: '跟打',
   recall: '默写',
+  listen: '听写',
+  speak: '跟读',
   flash: '闪卡',
   fall: '落字',
   letters: '字母落',

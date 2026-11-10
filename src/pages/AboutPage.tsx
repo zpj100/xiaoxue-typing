@@ -61,7 +61,7 @@ export default function AboutPage() {
           <span className="text-secondary ms-2">编译号 {APP_VERSION_CODE}</span>
         </p>
         <p className="text-secondary">
-          语文拼音 / 识字 / 写字，英语 PEP 单词 / 音标 / 短语 / 语法。闪卡先默打再评级，到期卡片按 1/2/4/7 天间隔再出。平板虚拟键盘可直接输入。
+          语文拼音 / 识字 / 写字，英语 48 音标 / PEP 单词 / 短语 / 语法。听写只播声音，跟读进间隔记忆。闪卡先默打再评级，到期卡片按 1/2/4/7 天再出。
         </p>
         <div className="d-flex flex-wrap gap-2 mt-3">
           <button type="button" className="btn btn-primary btn-lg" onClick={checkUpdate} disabled={status === 'checking'}>

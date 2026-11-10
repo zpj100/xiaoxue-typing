@@ -10,6 +10,7 @@ import {
   normalizeAnswer,
   speakItem,
   speakLetterWithWord,
+  speakListen,
   stopSpeak,
 } from '../lib/engine'
 import { prioritize, recordMemory, type MemoryGrade } from '../lib/memory'
@@ -43,6 +44,15 @@ export default function PlayPage() {
   const title = isWrongBook ? '错词本' : lesson?.name ?? ''
   const subject = isWrongBook ? items[0]?.subject : lesson?.subject
   const persistId = lesson?.id || lessonId
+  const backTo = isWrongBook
+    ? '/wrongbook'
+    : lesson?.kind === 'pinyin'
+      ? '/pinyin'
+      : lesson?.kind === 'phonetic'
+        ? '/phonetic'
+        : subject === 'english'
+          ? '/english'
+          : '/chinese'
 
   if (!isWrongBook && !lesson) {
     return (
@@ -83,9 +93,13 @@ export default function PlayPage() {
         lessonId={persistId}
         items={items}
         title={title}
-        backTo={isWrongBook ? '/wrongbook' : subject === 'english' ? '/english' : '/chinese'}
+        backTo={backTo}
       />
     )
+  }
+
+  if (playMode === 'speak') {
+    return <SpeakGame lessonId={persistId} items={items} title={title} backTo={backTo} />
   }
 
   if (playMode === 'fall' || playMode === 'letters') {
@@ -95,7 +109,7 @@ export default function PlayPage() {
         items={items}
         title={title}
         letterMode={playMode === 'letters'}
-        backTo={isWrongBook ? '/wrongbook' : subject === 'english' ? '/english' : '/chinese'}
+        backTo={backTo}
       />
     )
   }
@@ -106,7 +120,7 @@ export default function PlayPage() {
       items={items}
       title={title}
       mode={playMode}
-      backTo={isWrongBook ? '/wrongbook' : subject === 'english' ? '/english' : '/chinese'}
+      backTo={backTo}
     />
   )
 }
@@ -139,7 +153,8 @@ function TypeGame({
   const item = items[index]
   const target = item ? normalizeAnswer(item, mode) : ''
   const match = compareInput(typed, target)
-  const hideTarget = mode === 'recall'
+  const hideTarget = mode === 'recall' || mode === 'listen'
+  const listenOnly = mode === 'listen'
   const useIme = item?.kind === 'write'
   const nextKey = target[typed.length] || ''
   const minutes = Math.max((Date.now() - startedAt) / 60000, 1 / 60)
@@ -155,9 +170,10 @@ function TypeGame({
 
   useEffect(() => {
     if (!item) return
-    speakItem(item)
+    if (listenOnly) speakListen(item)
+    else speakItem(item)
     return () => stopSpeak()
-  }, [item])
+  }, [item, listenOnly])
 
   function finishLesson() {
     const typedCount = statsRef.current.typed
@@ -307,16 +323,22 @@ function TypeGame({
       ) : item ? (
         <div className="arena-card play-arena p-3 p-lg-5" onClick={() => inputRef.current?.focus()}>
           <div className="play-prompt">
-            <p className="prompt-sub mb-2">{item.hint}</p>
-            <div className="prompt-zh display-font mb-2">
-              {hideTarget && item.kind === 'write' ? item.hint : item.prompt}
-            </div>
-            {item.phonetic && item.kind !== 'pinyin' ? <p className="text-primary mb-3">{item.phonetic}</p> : null}
-            <SpeakerButton onClick={() => speakItem(item)} />
+            <p className="prompt-sub mb-2">{listenOnly ? '听声音，打出来' : item.hint}</p>
+            {listenOnly ? (
+              <div className="prompt-zh display-font mb-2">听写</div>
+            ) : (
+              <>
+                <div className="prompt-zh display-font mb-2">
+                  {hideTarget && item.kind === 'write' ? item.hint : item.prompt}
+                </div>
+                {item.phonetic && item.kind !== 'pinyin' ? <p className="text-primary mb-3">{item.phonetic}</p> : null}
+              </>
+            )}
+            <SpeakerButton onClick={() => (listenOnly ? speakListen(item) : speakItem(item))} />
           </div>
           <div className="play-type">
             <TypedLine target={target} typed={typed} hideTarget={hideTarget} />
-            {!useIme ? <KeyGuide nextKey={nextKey} /> : null}
+            {!useIme && !listenOnly ? <KeyGuide nextKey={nextKey} /> : null}
             <input
               ref={inputRef}
               className="form-control form-control-lg mt-3 mx-auto play-input"
@@ -511,6 +533,118 @@ function FlashGame({
             </button>
             <button type="button" className="btn btn-success btn-lg" onClick={() => mark('good')}>
               会了
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </Container>
+  )
+}
+
+function SpeakGame({
+  lessonId,
+  items,
+  title,
+  backTo,
+}: {
+  lessonId: string
+  items: LessonItem[]
+  title: string
+  backTo: string
+}) {
+  const [index, setIndex] = useState(0)
+  const [known, setKnown] = useState(0)
+  const [unknown, setUnknown] = useState(0)
+  const [finished, setFinished] = useState(false)
+  const locking = useRef(false)
+  const item = items[index]
+
+  useEffect(() => {
+    rememberPlay(lessonId, 'speak')
+  }, [lessonId])
+
+  useEffect(() => {
+    if (!item || finished) return
+    speakItem(item)
+    return () => stopSpeak()
+  }, [item, finished])
+
+  function mark(grade: MemoryGrade) {
+    if (!item || finished || locking.current) return
+    locking.current = true
+    recordMemory(item, grade)
+    const ok = grade === 'good'
+    const nextKnown = known + (ok ? 1 : 0)
+    const nextUnknown = unknown + (ok ? 0 : 1)
+    setKnown(nextKnown)
+    setUnknown(nextUnknown)
+    if (!ok) addWrong(item)
+    if (index + 1 >= items.length) {
+      setFinished(true)
+      recordLesson(lessonId, {
+        typed: items.length,
+        correct: nextKnown,
+        combo: nextKnown,
+        finished: true,
+        stars: nextUnknown === 0 ? 3 : 1,
+      })
+      return
+    }
+    setIndex((v) => v + 1)
+    locking.current = false
+  }
+
+  function restart() {
+    locking.current = false
+    setIndex(0)
+    setKnown(0)
+    setUnknown(0)
+    setFinished(false)
+  }
+
+  return (
+    <Container fluid="xl" className="play-page py-3 py-lg-4">
+      <div className="play-toolbar">
+        <Link className="btn btn-link px-0" to={backTo}>
+          返回课表
+        </Link>
+        <h1 className="h4 display-font mb-0">{title} · 跟读</h1>
+        <div>
+          <Badge bg="success" className="me-2">
+            会 {known}
+          </Badge>
+          <Badge bg="danger">生 {unknown}</Badge>
+        </div>
+      </div>
+      {finished ? (
+        <div className="arena-card p-4 p-lg-5 text-center">
+          <h2 className="display-font">本课跟读完成</h2>
+          <p>
+            会 {known} · 生 {unknown} · 共 {items.length} 题
+          </p>
+          <button type="button" className="btn btn-primary" onClick={restart}>
+            再读一遍
+          </button>
+        </div>
+      ) : item ? (
+        <div className="arena-card flash-card p-4 p-lg-5 text-center">
+          <p className="text-secondary mb-2">
+            {index + 1}/{items.length} · 先听，再跟着读，读完自己点
+          </p>
+          <div className="prompt-zh display-font mb-2">{item.prompt}</div>
+          <p className="fs-3 fw-bold text-primary mb-1">{item.answer}</p>
+          {item.phonetic ? <p className="text-primary fs-5">{item.phonetic}</p> : null}
+          {item.hint ? <p className="mb-3">{item.hint}</p> : null}
+          <SpeakerButton onClick={() => speakItem(item)} />
+          <div className="nav-row mt-4">
+            <button type="button" className="btn btn-outline-primary btn-lg" onClick={() => speakItem(item)}>
+              再听
+            </button>
+            <button type="button" className="btn btn-outline-danger btn-lg" onClick={() => mark('again')}>
+              还不会
+            </button>
+            <button type="button" className="btn btn-success btn-lg" onClick={() => mark('good')}>
+              读完了
             </button>
           </div>
         </div>

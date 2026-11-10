@@ -92,7 +92,7 @@ export const lessons: Lesson[] = [
   ...makeLessons(chineseHanzi, 'hanzi', 'chinese', '按年级上下册识字，看汉字打拼音。', defaultUnit('识字'), 10),
   ...makeLessons(chineseWrite, 'write', 'chinese', '按年级上下册写字，看提示打出汉字。', defaultUnit('写字'), 8),
   ...makeLessons(englishWords, 'word', 'english', '人教版 PEP 小学词表，按年级上下册单元分课。', defaultUnit('单词'), 10),
-  ...makeLessons(englishPhonetics, 'phonetic', 'english', '看音标打单词，按年级上下册编排。', defaultUnit('音标'), 8),
+  ...makeLessons(englishPhonetics, 'phonetic', 'english', '先学 48 个国际音标，再按年级看音标打单词。', defaultUnit('音标'), 8),
   ...makeLessons(englishPhrases, 'phrase', 'english', '课标常用短句，按年级上下册整句跟打。', defaultUnit('短语'), 6),
   ...makeLessons(englishGrammar, 'grammar', 'english', '按年级语法点填空，be 动词到过去时。', defaultUnit('语法'), 6),
 ]
@@ -116,6 +116,10 @@ export function lessonsBySubject(subject: Subject): Lesson[] {
   return lessons.filter((lesson) => lesson.subject === subject)
 }
 
+export function lessonsByKind(kind: Kind): Lesson[] {
+  return lessons.filter((lesson) => lesson.kind === kind)
+}
+
 export function nextLesson(id: string): Lesson | undefined {
   const index = lessons.findIndex((lesson) => lesson.id === id)
   if (index < 0) return undefined
@@ -134,7 +138,7 @@ export function dailyLesson(): Lesson {
   const day = todayKey()
   if (cachedDaily?.id === `daily-${day}`) return cachedDaily
   const pool = lessons
-    .filter((lesson) => lesson.kind === 'word' || lesson.kind === 'pinyin' || lesson.kind === 'hanzi' || lesson.kind === 'phrase')
+    .filter((lesson) => lesson.kind === 'word' || lesson.kind === 'pinyin' || lesson.kind === 'hanzi' || lesson.kind === 'phrase' || lesson.kind === 'phonetic')
     .flatMap((lesson) => lesson.items)
   const picked: LessonItem[] = []
   const used = new Set<string>()
