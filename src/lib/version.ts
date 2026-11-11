@@ -1,6 +1,6 @@
 export const APP_NAME = '学记小学'
-export const APP_VERSION = '1.5.0'
-export const APP_VERSION_CODE = 7
+export const APP_VERSION = '1.6.0'
+export const APP_VERSION_CODE = 8
 export const GITEE_OWNER = 'zpj100'
 export const GITEE_REPO = 'xiaoxue-typing'
 export const GITEE_URL = `https://gitee.com/${GITEE_OWNER}/${GITEE_REPO}`

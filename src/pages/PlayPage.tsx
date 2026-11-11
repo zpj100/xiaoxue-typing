@@ -13,7 +13,14 @@ import {
   speakListen,
   stopSpeak,
 } from '../lib/engine'
-import { prioritize, recordMemory, type MemoryGrade } from '../lib/memory'
+import {
+  flashItems,
+  isForwardCard,
+  nextIntervalLabel,
+  prioritize,
+  recordMemory,
+  type MemoryGrade,
+} from '../lib/memory'
 import { recordLesson, rememberPlay } from '../lib/progress'
 import type { LessonItem, PlayMode } from '../lib/types'
 import { addWrong, wrongItems } from '../lib/wrongbook'
@@ -79,7 +86,7 @@ export default function PlayPage() {
   if (lessonId === 'review' && items.length === 0) {
     return (
       <Container className="py-5">
-        <Alert variant="success">今天没有到期卡片。先去闪卡学新词，会了的会按间隔再出来。</Alert>
+        <Alert variant="success">今天没有到期卡片。先去闪卡学新词，会了的约 10 分钟后再见，然后隔天。</Alert>
         <Link className="btn btn-primary" to="/chinese">
           去语文课表
         </Link>
@@ -378,7 +385,10 @@ function FlashGame({
   title: string
   backTo: string
 }) {
-  const deck = useMemo(() => prioritize(items, 20), [items])
+  const deck = useMemo(() => {
+    const source = lessonId === 'review' ? items : flashItems(items)
+    return prioritize(source, 20)
+  }, [items, lessonId])
   const [index, setIndex] = useState(0)
   const [typed, setTyped] = useState('')
   const [revealed, setRevealed] = useState(false)
@@ -390,7 +400,7 @@ function FlashGame({
   const item = deck[index]
   const target = item ? normalizeAnswer(item, 'recall') : ''
   const match = compareInput(typed, target)
-  const useIme = item?.kind === 'write'
+  const useIme = Boolean(item && (item.kind === 'write' || isForwardCard(item)))
 
   useEffect(() => {
     rememberPlay(lessonId, 'flash')
@@ -410,7 +420,7 @@ function FlashGame({
     if (!item || finished || locking.current) return
     locking.current = true
     recordMemory(item, grade)
-    const ok = grade === 'good'
+    const ok = grade === 'good' || grade === 'easy'
     const nextKnown = known + (ok ? 1 : 0)
     const nextUnknown = unknown + (ok ? 0 : 1)
     setKnown(nextKnown)
@@ -473,7 +483,7 @@ function FlashGame({
           <p>
             会 {known} · 生 {unknown} · 共 {deck.length} 张
           </p>
-          <p className="text-secondary">会了的明天或更后才再出，忘了的今天还会排进来。</p>
+          <p className="text-secondary">新卡会了先隔约 10 分钟，再隔天。太简单拉更长。忘了马上再出。</p>
           <button type="button" className="btn btn-primary" onClick={restart}>
             再记一轮
           </button>
@@ -481,7 +491,7 @@ function FlashGame({
       ) : item ? (
         <div className="arena-card flash-card p-4 p-lg-5 text-center" onClick={() => inputRef.current?.focus()}>
           <p className="text-secondary mb-2">
-            {index + 1}/{deck.length} · 先默打，对了自动过；想不起来再翻面
+            {index + 1}/{deck.length} · {isForwardCard(item) ? '看英文打中文' : '先默打'}，对了自动过；想不起来再翻面
           </p>
           <div className="prompt-zh display-font mb-2">{item.prompt}</div>
           {revealed ? (
@@ -506,7 +516,7 @@ function FlashGame({
                 mark('good')
               }
             }}
-            placeholder="打出拼音或单词"
+            placeholder={isForwardCard(item) ? '打出中文' : '打出拼音或单词'}
             autoComplete="off"
             autoCapitalize="off"
             autoCorrect="off"
@@ -527,12 +537,19 @@ function FlashGame({
             </button>
             <button type="button" className="btn btn-outline-danger btn-lg" onClick={() => mark('again')}>
               再记
+              <span className="grade-when">{nextIntervalLabel(item, 'again')}</span>
             </button>
             <button type="button" className="btn btn-outline-warning btn-lg" onClick={() => mark('hard')}>
               犹豫
+              <span className="grade-when">{nextIntervalLabel(item, 'hard')}</span>
             </button>
             <button type="button" className="btn btn-success btn-lg" onClick={() => mark('good')}>
               会了
+              <span className="grade-when">{nextIntervalLabel(item, 'good')}</span>
+            </button>
+            <button type="button" className="btn btn-outline-primary btn-lg" onClick={() => mark('easy')}>
+              太简单
+              <span className="grade-when">{nextIntervalLabel(item, 'easy')}</span>
             </button>
           </div>
         </div>
@@ -642,9 +659,11 @@ function SpeakGame({
             </button>
             <button type="button" className="btn btn-outline-danger btn-lg" onClick={() => mark('again')}>
               还不会
+              <span className="grade-when">{nextIntervalLabel(item, 'again')}</span>
             </button>
             <button type="button" className="btn btn-success btn-lg" onClick={() => mark('good')}>
               读完了
+              <span className="grade-when">{nextIntervalLabel(item, 'good')}</span>
             </button>
           </div>
         </div>

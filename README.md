@@ -2,7 +2,7 @@
 
 给小学生用的语文 / 英语打字游戏。打开浏览器就能练。
 
-当前版本 **1.5.0**。公开仓：[gitee.com/zpj100/xiaoxue-typing](https://gitee.com/zpj100/xiaoxue-typing)。安装包在 [Gitee Releases](https://gitee.com/zpj100/xiaoxue-typing/releases)。App 内「关于」检查 Gitee 发行版，下载时显示进度条。GitHub 镜像：[github.com/zpj100/xiaoxue-typing](https://github.com/zpj100/xiaoxue-typing)。
+当前版本 **1.6.0**。公开仓：[gitee.com/zpj100/xiaoxue-typing](https://gitee.com/zpj100/xiaoxue-typing)。安装包在 [Gitee Releases](https://gitee.com/zpj100/xiaoxue-typing/releases)。App 内「关于」检查 Gitee 发行版，下载时显示进度条。GitHub 镜像：[github.com/zpj100/xiaoxue-typing](https://github.com/zpj100/xiaoxue-typing)。
 
 ## 练什么
 
@@ -15,7 +15,7 @@
 - 默写：只给汉字、中文或音标
 - 听写：只播声音，打出拼音或例词
 - 跟读：先听再跟读，读完点会了或还不会
-- 闪卡：先默打，对了自动过；翻面后评级
+- 闪卡：先默打，对了自动过；英语正查/反查分开记；按钮标下次间隔
 - 落字：整词往下掉，打对就接住，速度可调
 - 字母落：逐个字母落下，同步读字母、单词和汉字/翻译
 
@@ -49,7 +49,7 @@ cd android
 ./gradlew assembleRelease --no-daemon
 ```
 
-产物：`android/app/build/outputs/apk/release/app-release.apk`。拷成 `xueji-xiaoxue-1.5.0.apk` 挂到 Gitee Release，不要 `git add`。
+产物：`android/app/build/outputs/apk/release/app-release.apk`。拷成 `xueji-xiaoxue-1.6.0.apk` 挂到 Gitee Release，不要 `git add`。
 
 包名 `com.xiaoxue.typing`，`minSdk 24`，横竖屏随平板转动。离线 WebView 用 `HashRouter`；朗读走系统 TTS（`AndroidSpeak`）。关于页走 `AndroidUpdate` 检 Gitee 最新发行版。
 

@@ -164,6 +164,12 @@ export function speakLetter(letter: string, lang = 'en-US'): void {
 
 export function voiceParts(item: LessonItem): SpeakPart[] {
   if (item.subject === 'english') {
+    if (item.id.endsWith('__fwd')) {
+      return [
+        { text: item.prompt, lang: 'en-US' },
+        { text: item.answer, lang: 'zh-CN' },
+      ]
+    }
     const zh = item.hint || item.prompt
     return [
       { text: item.answer, lang: 'en-US' },

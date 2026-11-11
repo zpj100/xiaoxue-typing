@@ -1,7 +1,7 @@
 import { Col, Container, Row } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { BANK_STATS, dailyLesson, reviewLesson } from '../data/lessons'
-import { memoryStats } from '../lib/memory'
+import { NEW_PER_DAY, REVIEW_PER_DAY, memoryStats } from '../lib/memory'
 import { accuracy, loadProgress } from '../lib/progress'
 
 export default function Home() {
@@ -20,7 +20,7 @@ export default function Home() {
             <p className="text-primary fw-semibold mb-2">白底蓝字 · 打字游戏</p>
             <h1 className="display-font prompt-zh mb-3">学记小学</h1>
             <p className="lead mb-4">
-              按年级选课。拼音听写跟读，48 个国际音标先听再打。闪卡先默打，到期卡进今日复习。
+              按年级选课。拼音听写跟读，48 个国际音标先听再打。闪卡先默打，英语正查反查分开记。
             </p>
             <div className="home-tabs">
               <div className="home-tab-row">
@@ -121,7 +121,9 @@ export default function Home() {
         <Col md={6} xl={4}>
           <div className="mode-card p-4 h-100">
             <h3 className="h5 display-font">间隔记忆</h3>
-            <p className="mb-0 text-secondary">到期先复习，会了 1/2/4/7 天后再出。忘了当天再排。连续打卡 {memory.streak} 天。</p>
+            <p className="mb-0 text-secondary">
+              新卡每天 {NEW_PER_DAY} 张，到期每天 {REVIEW_PER_DAY} 张。会了先隔约 10 分钟，再隔天。太简单拉更长。连续打卡 {memory.streak} 天。
+            </p>
           </div>
         </Col>
       </Row>
@@ -155,7 +157,7 @@ export default function Home() {
         <Col md={6} xl={4}>
           <div className="mode-card p-4 h-100">
             <h3 className="h5 display-font">闪卡</h3>
-            <p className="mb-0 text-secondary">先默打，对了自动过。翻面后点会了 / 犹豫 / 再记，按间隔排下次。</p>
+            <p className="mb-0 text-secondary">先默打，对了自动过。英语看英文打中文、看中文打英文分开记。按钮上标下次间隔。</p>
           </div>
         </Col>
         <Col md={6} xl={4}>

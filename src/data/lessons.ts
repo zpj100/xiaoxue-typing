@@ -1,4 +1,4 @@
-import { dueItems, todayKey } from '../lib/memory'
+import { REVIEW_PER_DAY, dueItems, todayKey } from '../lib/memory'
 import type { Kind, Lesson, LessonItem, PlayMode, Subject, Term } from '../lib/types'
 import { chineseHanzi, chinesePinyin, chineseWrite } from './chinese'
 import { englishGrammar, englishPhonetics, englishPhrases, englishWords } from './english'
@@ -165,7 +165,7 @@ export function dailyLesson(): Lesson {
 }
 
 export function reviewLesson(): Lesson {
-  const items = dueItems(20)
+  const items = dueItems(REVIEW_PER_DAY)
   return {
     id: 'review',
     subject: items[0]?.subject ?? 'chinese',
@@ -174,7 +174,7 @@ export function reviewLesson(): Lesson {
     kind: 'hanzi',
     unit: '今日复习',
     name: `今日复习 ${items.length} 张`,
-    blurb: '到期卡片优先。会了拉长间隔，忘了当天再出。',
+    blurb: '到期优先，每天最多 20 张。新卡会了先隔约 10 分钟，再隔天。',
     items,
   }
 }
